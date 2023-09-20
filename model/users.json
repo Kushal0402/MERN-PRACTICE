@@ -1,0 +1,19 @@
+[
+  {
+    "username": "Kushal",
+    "roles": { "User": 2000, "Editor": 4000 },
+    "password": "$2b$10$Yt2HBnCUI8eWgClweTCgqugCMHr5tvrtrYuSZoCTE0qtISbZNtzh."
+  },
+  {
+    "username": "fate",
+    "roles": { "User": 2000, "Admin": 5000 },
+    "password": "$2b$10$S3/Up.FiCUwMlcG.QL29eeP6ZYS7Gl98XeE7C2D468gGASiGCpIfm",
+    "refreshtoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZhdGUiLCJpYXQiOjE2ODUxMTgyNTYsImV4cCI6MTY4NTIwNDY1Nn0.cRESQtz4VqW6wCWXFH3-hhHaKFA3wMfo1UAkGICogb0"
+  },
+  {
+    "username": "Darpan",
+    "roles": { "User": 2000 },
+    "password": "$2b$10$1ZMW.8B/u5WzkkKOfuaFDObOxp8hwzS8CiQx2KXiBX0URZ8CY660.",
+    "refreshtoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkRhcnBhbiIsImlhdCI6MTY4NTExODM2MywiZXhwIjoxNjg1MjA0NzYzfQ.3fQ-K53ABbxkdw4bwfL8LEZ9TAoJeIy9gbuIYsMlLs0"
+  }
+]

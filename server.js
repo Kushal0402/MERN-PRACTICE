@@ -1,108 +1,41 @@
-const http = require("http");
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 const path = require("path");
-const fs = require("fs");
-const fsPromises = require("fs").promises;
-
-const logEvents = require("./logEvents");
-const EventEmitter = require("events");
-
-class Emitter extends EventEmitter {}
-
-const myEmitter = new Emitter();
-
+const { logger } = require("./middleware/logEvents");
+const verifyJWT = require("./middleware/verifyJWT");
+const cookieParser = require("cookie-parser");
+const credentials = require("./middleware/credentials");
+const mongoose = require("mongoose");
+const connectDB = require("./config/dbConnection");
+const { connect } = require("http2");
 const PORT = process.env.port || 3500;
 
-const serveFile = async (filePath, contentType, response) => {
-  try {
-    const rawData = await fsPromises.readFile(
-      filePath,
-      !contentType.includes === "image" ? "utf-8" : ""
-    );
+connectDB();
 
-    const data =
-      contentType === "application/json" ? JSON.parse(rawData) : rawData;
-    response.writeHead(filePath.includes("404.html") ? 404 : 200, {
-      "Content-Type": contentType,
-    });
+app.use(logger);
 
-    response.end(
-      contentType === "application/json" ? JSON.stringify(data) : data
-    );
-  } catch (err) {
-    console.log(err);
-    response.statusCode = 500;
-    response.end();
-  }
-};
+app.use(credentials);
 
-const server = http.createServer((req, res) => {
-  console.log(req.url, req.method);
+app.use(cors(corsOptions));
 
-  const extension = path.extname(req.url);
+app.use(express.json());
 
-  let contentType;
+app.use(cookieParser());
 
-  switch (extension) {
-    case ".css":
-      contentType = "text/css";
-      break;
+app.use(express.static(path.join(__dirname, "/public")));
 
-    case ".js":
-      contentType = "text/javascript";
-      break;
+app.use("/", require("./routes/root"));
+app.use("/register", require("./routes/register"));
+app.use("/auth", require("./routes/auth"));
+app.use("/refresh", require("./routes/refreshToken"));
+app.use("/logout", require("./routes/logout"));
 
-    case ".json":
-      contentType = "application/json";
-      break;
+app.use(verifyJWT);
+app.use("/family", require("./routes/family"));
 
-    case ".jpg":
-      contentType = "image/jpeg";
-      break;
-
-    case ".png":
-      contentType = "image/png";
-      break;
-
-    case ".txt":
-      contentType = "text/plain";
-      break;
-
-    default:
-      contentType = "text/html";
-      break;
-  }
-
-  let filePath =
-    contentType === "text/html" && req.url === "/"
-      ? path.join(__dirname, "views", "index.html")
-      : contentType === "text/html" && req.url.slice(-1) === "/"
-      ? path.join(__dirname, "views", req.url, "index.html")
-      : contentType === "text/html"
-      ? path.join(__dirname, "views", req.url)
-      : path.join(__dirname, req.url);
-
-  if (!extension && req.url.slice(-1) !== "/") {
-    filePath += ".html";
-  }
-
-  if (fs.existsSync(filePath)) {
-    serveFile(filePath, contentType, res);
-  } else {
-    switch (path.parse(filePath).base) {
-      case "old-page.html":
-        res.writeHead(301, { Location: "/new-page.html" });
-        res.end();
-        break;
-      default:
-        serveFile(path.join(__dirname, "views", "404.html"), "text/html", res);
-    }
-  }
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB");
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
-
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-// myEmitter.on("log", (msg) => {
-//   logEvents(msg);
-// });
-
-//   myEmitter.emit("log", "Log event emitted");
